@@ -1,19 +1,67 @@
 // Wrap all code that interacts with the DOM in a call to jQuery to ensure that the code isn't run until the browser has finished rendering all the elements in the html.
 
 $(function () {
-    // TODO: Add a listener for click events on the save button. This code should use the id in the containing time-block as a key to save the user input in local storage. 
-    // HINT: What does `this` reference in the click listener function? How can DOM traversal be used to get the "hour-x" id of the time-block containing the button that was clicked? How might the id be useful when saving the description in local storage?
 
-    // TODO: Add code to apply the past, present, or future class to each time block by comparing the id to the current hour. 
-    //HINTS: How can the id attribute of each time-block be used to conditionally add or remove the past, present, and future classes? How can Day.js be used to get the current hour in 24-hour time?
+    // Adds a listener for click events on the save button.
+    const saveButtons = document.querySelectorAll(".saveBtn");
 
-    // TODO: Add code to get any user input that was saved in localStorage and set the values of the corresponding textarea elements. 
-    // HINT: How can the id attribute of each time-block be used to do this?
+    saveButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            // Use DOM traversal to get the parent element with the class "time-block"
+            const timeBlock = this.closest(".time-block");
+            // Get the id of the time-block
+            const timeBlockId = timeBlock.id;
+            // Get the user input from the description
+            const userInput = timeBlock.querySelector(".description").value;
+            // Save the user input in local storage using the id as the key
+            localStorage.setItem(timeBlockId, userInput);
+        });
+    });
 
-    // TODO: Add code to display the current date in the header of the page.
+
+    // Gets the current hour in 24-hour time using Day.js
+    const currentHour = dayjs().hour();
+    const timeBlocks = document.querySelectorAll(".time-block");
+
+    timeBlocks.forEach(block => {
+        // Get the hour from the id attribute of the time block
+        const blockHour = parseInt(block.id);
+
+        if (blockHour < currentHour) {
+            // Add the past class if the time block is in the past
+            block.classList.add("past");
+        } else if (blockHour > currentHour) {
+            // Add the future class if the time block is in the future
+            block.classList.add("future");
+        } else {
+            // Add the present class if the time block is the current hour
+            block.classList.add("present");
+        }
+    });
+
+
+    // Adds code to get any user input that was saved in localStorage and set the values of the corresponding textarea elements. 
+
+    window.onload = function () {
+        const timeBlock = document.querySelectorAll(".time-block");
+
+        timeBlock.forEach(block => {
+            // Get the id of the time-block
+            const timeBlockId = block.id;
+            // Get the user input from local storage using the id as the key
+            const userInput = localStorage.getItem(timeBlockId);
+            // If there is user input saved for this time block, set the value of the textarea
+            if (userInput) {
+                block.querySelector(".description").value = userInput;
+            }
+        });
+    }
+
+
+    // Displays the current date in the header of the page.
     function updateClock() {
         var now = dayjs();
-        var timeString = now.format("MMMM DD,YYYY hh:mm:ss A");
+        var timeString = now.format("MMMM DD,YYYY hh:mm A");
         document.getElementById("date").innerText = timeString
     }
     setInterval(updateClock, 1000);
